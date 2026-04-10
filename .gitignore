@@ -207,7 +207,7 @@ marimo/_lsp/
 __marimo__/
 
 # ignore unwanted directories
-models/
-input/
-output/
-logs/
+models/*.pt
+input/*.mp4
+output/*.mp4
+log/*.log
