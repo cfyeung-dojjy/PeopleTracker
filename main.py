@@ -44,29 +44,6 @@ except Exception as exc:
     model = None
 
 
-def _resolve_output_filename(output_filename: str | None) -> str:
-    """Prepare file name for the processed file
-    if output_filename is provided, add a timestamp as subfix to avoid the following issues:
-    1. 2 filenames is the same
-    2. we process the same file multiple times, and we want to keep all the processed files instead of overwriting them.
-
-    Parameters
-    ----------
-    output_filename : str | None
-        The output filename provided by the user. It can be None or a string.
-
-    Returns
-    -------
-    str
-        The resolved output filename with a timestamp subfix if output_filename is provided, otherwise just a timestamp as the filename.
-    """
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    if output_filename:
-        base = Path(output_filename).stem
-        return f"{base}_{timestamp}.mp4"
-    return f"{timestamp}.mp4"
-
-
 @app.get("/")
 def health_check():
     return {"status": "ok", "message": "Ultralytics FastAPI video API is running"}
@@ -104,40 +81,31 @@ def process_video(video_path: str, output_filename: str | None = None):
             status_code=404,
             detail={"status": "error", "message": f"Video file not found: {source_path}"},
         )
-
-    output_name = _resolve_output_filename(output_filename)
-    output_path = OUTPUT_DIR / output_name
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = OUTPUT_DIR / timestamp
 
     logger.info("Processing video: %s", source_path)
-    logger.info("Output path: %s", output_path)
+    logger.info("Output path: %s", output_dir)
     logger.info("Using tracker: %s", TRACKER_NAME)
 
     try:
         results = model.track(
             source=str(source_path),
             save=True,
-            save_dir=str(OUTPUT_DIR),
-            name=output_path.stem,
+            save_dir=output_dir,
             classes=[0],
             conf=0.25,
+            # persist=True, # needed if we track the video frame-by-frame, i.e. from a streaming video source
             tracker=TRACKER_NAME,
         )
 
         if not results:
             raise RuntimeError("No track results returned")
 
-        result = results[0]
-        saved_path = getattr(result, "path", None)
-        if saved_path:
-            saved_path = Path(saved_path)
-            if saved_path.is_file():
-                output_path = saved_path
-        elif output_path.exists():
-            logger.info("Using fallback output path: %s", output_path)
-        else:
-            logger.warning("Expected output file does not exist after tracking: %s", output_path)
+        # Ultralytics saves the processed video as {save_dir}/{source_path.stem}.avi
+        # We have to convert them to mp4 by ourselves
+        output_path = output_dir / f"{source_path.stem}.avi"
 
-        logger.info("Completed processing: %s", output_path)
         return {
             "status": "success",
             "video_path": str(source_path.resolve()),
