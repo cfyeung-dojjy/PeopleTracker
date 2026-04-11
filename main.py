@@ -2,6 +2,7 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
+import subprocess
 
 import uvicorn
 from dotenv import load_dotenv
@@ -43,11 +44,34 @@ except Exception as exc:
     logger.exception("Failed to load YOLO model")
     model = None
 
-
 @app.get("/")
 def health_check():
     return {"status": "ok", "message": "Ultralytics FastAPI video API is running"}
 
+def avi_to_mp4(avi_path: Path) -> Path:
+    """Convert .avi video to .mp4 using ffmpeg in the same directory as the input file.
+
+    Assumes the filenames are unique
+
+    Parameters
+    ----------
+    avi_path : Path
+        Ultralytics saved .avi video
+
+    Returns
+    -------
+    Path
+        The converted .mp4 video path
+
+    Raises
+    ------
+    subprocess.CalledProcessError
+        If ffmpeg command fails
+    """
+    mp4_path = avi_path.with_suffix(".mp4")
+    command = ["ffmpeg", "-i", str(avi_path), "-y", str(mp4_path)]
+    subprocess.run(command, check=True)
+    return mp4_path
 
 @app.post("/process-video")
 def process_video(video_path: str, output_filename: str | None = None):
@@ -105,6 +129,7 @@ def process_video(video_path: str, output_filename: str | None = None):
         # Ultralytics saves the processed video as {save_dir}/{source_path.stem}.avi
         # We have to convert them to mp4 by ourselves
         output_path = output_dir / f"{source_path.stem}.avi"
+        output_path = avi_to_mp4(output_path)
 
         return {
             "status": "success",
@@ -120,6 +145,13 @@ def process_video(video_path: str, output_filename: str | None = None):
                 "message": "Failed to process video. See log/app.log for details.",
             },
         )
+    except subprocess.CalledProcessError as e:
+        logger.error("Failed to convert AVI to MP4: %s", e)
+        return {
+            "status": "avi file generated but failed to convert to mp4",
+            "video_path": str(source_path.resolve()),
+            "output_path": str(output_path.resolve()),
+        }
 
 
 if __name__ == "__main__":

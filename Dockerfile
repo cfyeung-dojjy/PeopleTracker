@@ -1,6 +1,6 @@
 FROM ghcr.io/astral-sh/uv:python3.11-trixie-slim
 
-# required .so files for opencv-python
+# required .so files for opencv-python and ffmpeg for avi->mp4 conversion
 RUN apt-get update && apt-get install -y \
     libxcb1 \
     libx11-6 \
@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libxrender1 \
     libgl1 \
     libglib2.0-0 \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Setup a non-root user
