@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    image: renrobots-interview-app:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount log, output, input, and models directories
+      - ./log:/app/log
+      - ./output:/app/output
+      - ./input:/app/input:ro # read only
+      - ./models:/app/models:ro # read only
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: uv run main.py
