@@ -74,7 +74,7 @@ def avi_to_mp4(avi_path: Path) -> Path:
     return mp4_path
 
 @app.post("/process-video")
-def process_video(video_path: str, output_filename: str | None = None):
+def process_video(video_path: str):
     if model is None:
         logger.error("Model is not available")
         raise HTTPException(
