@@ -18,7 +18,7 @@ app = FastAPI()
 LOG_DIR = Path("log")
 INPUT_DIR = Path("input")
 OUTPUT_DIR = Path("output")
-MODEL_WEIGHTS = os.getenv("YOLO_MODEL", "yolov8n.pt")
+MODEL_WEIGHTS = os.getenv("YOLO_MODEL", "models/yolov8n.pt")
 TRACKER_NAME = os.getenv("TRACKER_NAME", "bytetrack.yaml")
 LOG_FILE = LOG_DIR / "app.log"
 
