@@ -118,7 +118,9 @@ def process_video(video_path: str):
             save=True,
             save_dir=output_dir,
             classes=[0],
-            conf=0.25,
+            conf=0.25, # Adjusting this value can help reduce false positives.
+            iou=0.7, # Lower values result in fewer detections by eliminating overlapping boxes, useful for reducing duplicates.
+            batch=32, # only works when the source is a directory, video file, or .txt file
             # persist=True, # needed if we track the video frame-by-frame, i.e. from a streaming video source
             tracker=TRACKER_NAME,
         )
