@@ -17,3 +17,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     command: uv run main.py
+
+    # comment below out if nvidia gpu is not available or you want to run on CPU; requires nvidia-container-toolkit
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
