@@ -18,8 +18,8 @@ app = FastAPI()
 LOG_DIR = Path("log")
 INPUT_DIR = Path("input")
 OUTPUT_DIR = Path("output")
-MODEL_WEIGHTS = os.getenv("YOLO_MODEL", "models/yolov8n.pt")
-TRACKER_NAME = os.getenv("TRACKER_NAME", "bytetrack.yaml")
+MODEL_WEIGHTS = os.getenv("YOLO_MODEL", "models/yolo26x.pt")
+TRACKER_NAME = os.getenv("TRACKER_NAME", "tracker/botsort_reid.yaml")
 LOG_FILE = LOG_DIR / "app.log"
 
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -118,11 +118,11 @@ def process_video(video_path: str):
             save=True,
             save_dir=output_dir,
             classes=[0],
-            conf=0.25, # Adjusting this value can help reduce false positives.
-            iou=0.7, # Lower values result in fewer detections by eliminating overlapping boxes, useful for reducing duplicates.
+            conf=0.1, # Adjusting this value can help reduce false positives.
+            iou=1.0, # Lower values result in fewer detections by eliminating overlapping boxes, useful for reducing duplicates.
             batch=32, # only works when the source is a directory, video file, or .txt file
             show_conf=False,
-            # persist=True, # needed if we track the video frame-by-frame, i.e. from a streaming video source
+            persist=True,
             tracker=TRACKER_NAME,
         )
 
