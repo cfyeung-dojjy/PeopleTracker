@@ -75,6 +75,14 @@ def avi_to_mp4(avi_path: Path) -> Path:
 
 @app.post("/process-video")
 def process_video(video_path: str):
+    """given a video path relative to input/, process the video with YOLO and return the output path.
+    a .avi video will be saved in output/ by ultralytics, and then converted to .mp4 by ffmpeg. The .avi file will be deleted after conversion.
+
+    Parameters
+    ----------
+    video_path : str
+        video path relative to input/ directory, e.g. "MOT16-08-raw.mp4"
+    """
     if model is None:
         logger.error("Model is not available")
         raise HTTPException(
