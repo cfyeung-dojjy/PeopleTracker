@@ -136,7 +136,12 @@ def process_video(video_path: str):
         )
 
         if not results:
-            raise RuntimeError("No track results returned")
+            logger.error("No results returned from model.track() for video: %s", source_path)
+            raise Exception("No results returned from model.track()")
+
+        # have to have this loop, otherwise video won't be saved until the generator is exhausted, which causes the API to hang until the entire video is processed and results are returned. This way, the video will be saved frame by frame as results are generated, and we can convert it to mp4 while it's being processed.
+        for result in results:
+            continue
 
         # Ultralytics saves the processed video as {save_dir}/{source_path.stem}.avi
         # We have to convert them to mp4 by ourselves
@@ -145,6 +150,13 @@ def process_video(video_path: str):
 
         return {
             "status": "success",
+            "video_path": str(source_path.resolve()),
+            "output_path": str(output_path.resolve()),
+        }
+    except subprocess.CalledProcessError as e:
+        logger.error("Failed to convert AVI to MP4: %s", e)
+        return {
+            "status": "avi file generated but failed to convert to mp4",
             "video_path": str(source_path.resolve()),
             "output_path": str(output_path.resolve()),
         }
@@ -157,14 +169,6 @@ def process_video(video_path: str):
                 "message": "Failed to process video. See log/app.log for details.",
             },
         )
-    except subprocess.CalledProcessError as e:
-        logger.error("Failed to convert AVI to MP4: %s", e)
-        return {
-            "status": "avi file generated but failed to convert to mp4",
-            "video_path": str(source_path.resolve()),
-            "output_path": str(output_path.resolve()),
-        }
-
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
