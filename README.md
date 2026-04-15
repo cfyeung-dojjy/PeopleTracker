@@ -1,5 +1,7 @@
 # Project Setup and Build Guide
 
+<mark><b>Visit [here](https://drive.google.com/file/d/1Pb2eaShuP_8nBKSGXwkgqkYXcx-Cwb0p/view) for the processed MOT16-08 video</b></mark>
+
 ## Building the Docker Image
 
 ### Prerequisites
