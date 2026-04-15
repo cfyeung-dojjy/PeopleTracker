@@ -131,6 +131,7 @@ def process_video(video_path: str):
             batch=32, # only works when the source is a directory, video file, or .txt file
             show_conf=False,
             persist=True,
+            stream=True,
             tracker=TRACKER_NAME,
         )
 
