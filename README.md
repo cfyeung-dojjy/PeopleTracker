@@ -8,6 +8,8 @@
 
 Before building the Docker image, you need to prepare the environment and download required model files.
 
+The final image size should be ~10GB, mainly due to ultralytics requiring Pytorch and Opencv. I have found no way to reduce the image size by a meaningful amount. Except if we install the CPU-only pytorch packages.
+
 ### Step 1: Prepare the .env File
 
 Create a `.env` file in the project root directory with the following configuration:
